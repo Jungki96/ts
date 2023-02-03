@@ -83,7 +83,7 @@ const lynn: Players<null> = {
   name: "lynn",
   extraInfo: null,
 };
-
+//
 // Classes
 
 abstract class User {
