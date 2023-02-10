@@ -16,6 +16,7 @@ const App = (): JSX.Element => {
   const observerRef = React.useRef<IntersectionObserver>();
   const boxRef = React.useRef<HTMLDivElement>(null);
 
+  console.log();
   // useEffect
   React.useEffect(() => {
     getInfo();
