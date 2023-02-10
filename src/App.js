@@ -1,9 +1,9 @@
-import Ex from "./page/Ex";
+import Infinite from "./page/Infinite";
 
 function App() {
   return (
     <div className="App">
-      <Ex />
+      <Infinite />
     </div>
   );
 }
