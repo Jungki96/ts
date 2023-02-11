@@ -1,24 +1,95 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import { useObserver } from "mobx-react-lite";
 import styled from "styled-components";
 
+const InfiniteScroll = () => {
+  const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef();
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const res = await axios.get(`http://localhost:3001/userList`);
+    // setData((prevData) => [...prevData, ...res.data]);
+    setData(res.data);
+    console.log(data);
+    setLoading(false);
+    setHasMore(res.data.length !== 0);
+    if (res.data.length !== 0) {
+      setPage((num) => num + 1);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleScroll = useCallback(() => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop !==
+        document.documentElement.offsetHeight ||
+      loading
+    ) {
+      return;
+    }
+    fetchData();
+  }, [loading, fetchData]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  const remainingData = data.slice(0, page * 2);
+
+  return (
+    <>
+      <Container>
+        <StOnePage>
+          {remainingData.map((why, id) => {
+            if (id % 2 === 0) {
+              const group = remainingData.slice(id, id + 2);
+              return (
+                <OneDog key={id}>
+                  {group.map(({ url, name }) => (
+                    <StDog style={{ backgroundImage: `url(${url})` }} key={name}>
+                      <StName>{name}</StName>
+                    </StDog>
+                  ))}
+                </OneDog>
+              );
+            }
+            return null;
+          })}
+          {loading && <div>Loading...</div>}
+          {!loading && !hasMore && <div>더이상 가져올 데이터가 없습니다 ㅠㅠ</div>}
+          <div ref={observer} />
+        </StOnePage>
+      </Container>
+    </>
+  );
+};
+
+export default InfiniteScroll;
+
 const Container = styled.div`
-  display: flex;
-  /* justify-content: center; */
-  flex-direction: row;
   margin-top: 5vh;
 `;
 
 const StOnePage = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const StDog = styled.div`
   position: relative;
   width: 400px;
   padding: 10px;
+  margin: 10px 10px 10px 10px;
   max-width: 45vw;
   height: 45vh;
   border-radius: 20px;
@@ -37,99 +108,6 @@ const StName = styled.h3`
 const OneDog = styled.div`
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  width: 50%;
 `;
-
-const InfiniteScroll = () => {
-  //   const [list, setList] = useState([]);
-  //   const [page, setPage] = useState(1);
-  //   const [isFetching, setIsFetching] = useState(false);
-  //   const [error, setError] = useState(null);
-  //   const loader = useRef(null);
-
-  //   const fetchData = async () => {
-  //     setIsFetching(true);
-
-  //     try {
-  //       const response = await axios.get(`http://localhost:3001/userList`);
-  //       setList(list.concat(response.data));
-  //     } catch (error) {
-  //       setError(error);
-  //     }
-
-  //     setIsFetching(false);
-  //   };
-
-  //   useEffect(() => {
-  //     const observer = new IntersectionObserver((entries) => {
-  //       if (entries[0].isIntersecting && !isFetching) {
-  //         setPage(page + 1);
-  //       }
-  //     });
-  //     observer.observe(loader.current);
-  //   }, [isFetching, page]);
-
-  //   useEffect(() => {
-  //     fetchData();
-  //   }, [page]);
-
-  //   return useObserver(() => (
-  //     <Container>
-  //       <StOnePage>
-  //         {list.map(({ url, name }) => (
-  //           <OneDog key={name}>
-  //             <StDog style={{ backgroundImage: `url(${url})` }}>
-  //               <StName>{name}</StName>
-  //             </StDog>
-  //           </OneDog>
-  //         ))}
-  //         {error && <p>Error!</p>}
-  //         {isFetching && <p>Loading...</p>}
-  //         <div ref={loader} />
-  //       </StOnePage>
-  //     </Container>
-  //   ));
-  // };
-  const [list, setList] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState(false);
-  const loader = useRef(null);
-
-  const fetchData = async () => {
-    setIsFetching(true);
-    try {
-      const response = await axios.get("http://localhost:3001/userList");
-      setList(list.concat(response.data));
-    } catch (e) {
-      setError(true);
-    }
-    setIsFetching(false);
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        fetchData();
-      }
-    });
-    observer.observe(loader.current);
-  }, [loader]);
-
-  return useObserver(() => (
-    <Container>
-      <StOnePage>
-        {list.map(({ id, name, url }) => (
-          <OneDog key={id}>
-            <StDog style={{ backgroundImage: `url(${url})` }}>
-              <StName>{name}</StName>
-            </StDog>
-          </OneDog>
-        ))}
-        {error && <p>Error!</p>}
-        {isFetching && <p>Loading...</p>}
-        <div ref={loader} />
-      </StOnePage>
-    </Container>
-  ));
-};
-
-export default InfiniteScroll;
