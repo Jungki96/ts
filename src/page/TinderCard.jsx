@@ -13,6 +13,7 @@ const Home = () => {
 
   const outOfFrame = (name) => {
     console.log(name + "왼쪽으로 스크린");
+    console.log(name);
   };
 
   const fetchList = async () => {
