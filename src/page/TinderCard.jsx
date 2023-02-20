@@ -16,6 +16,7 @@ const Home = () => {
     console.log(name);
     console.log(name);
     console.log(name);
+    console.log(name);
   };
 
   const fetchList = async () => {
