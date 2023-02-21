@@ -42,7 +42,7 @@ const InfiniteScroll = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  const remainingData = data.slice(0, page * 2);
+  const remainingData = data.slice(0, page * 3);
 
   return (
     <>
@@ -54,17 +54,21 @@ const InfiniteScroll = () => {
               return (
                 <OneDog key={id}>
                   {group.map(({ url, name }) => (
-                    <StDog style={{ backgroundImage: `url(${url})` }} key={name}>
-                      <StName>{name}</StName>
-                    </StDog>
+                    <Stgroup>
+                      <StDog style={{ backgroundImage: `url(${url})` }} key={name}>
+                        <StName>{name}</StName>
+                      </StDog>
+                      <div>
+                        <button>수락</button>
+                        <button>거절</button>
+                      </div>
+                    </Stgroup>
                   ))}
                 </OneDog>
               );
             }
             return null;
           })}
-          {loading && <div>Loading...</div>}
-          {!loading && !hasMore && <div>더이상 가져올 데이터가 없습니다 ㅠㅠ</div>}
           <div ref={observer} />
         </StOnePage>
       </Container>
@@ -82,16 +86,21 @@ const StOnePage = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* justify-content: center; */
+`;
+
+const Stgroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const StDog = styled.div`
   position: relative;
-  width: 400px;
+  width: 15vh;
+  height: 40vh;
   padding: 10px;
   margin: 10px 10px 10px 10px;
-  max-width: 45vw;
-  height: 45vh;
   border-radius: 20px;
   background-size: cover;
   background-position: center;
@@ -109,5 +118,5 @@ const OneDog = styled.div`
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  width: 50%;
+  width: 80vh;
 `;
